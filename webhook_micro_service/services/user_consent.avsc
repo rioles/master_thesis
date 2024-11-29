@@ -1,0 +1,99 @@
+{
+  "UserConsentData": {
+    "type": "record",
+    "name": "UserConsentData",
+    "namespace": "com.example",
+    "fields": [
+      {
+        "name": "client",
+        "type": {
+          "type": "record",
+          "name": "Client",
+          "fields": [
+            {
+              "name": "client_id",
+              "type": "string"
+            },
+            {
+              "name": "client_name",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      {
+        "name": "consent_need",
+        "type": {
+          "type": "record",
+          "name": "ConsentNeed",
+          "fields": [
+            {
+              "name": "age",
+              "type": {
+                "type": "array",
+                "items": "string"
+              }
+            },
+            {
+              "name": "email_address",
+              "type": {
+                "type": "array",
+                "items": "string"
+              }
+            },
+            {
+              "name": "name",
+              "type": {
+                "type": "array",
+                "items": "string"
+              }
+            },
+            {
+              "name": "telephone_number",
+              "type": {
+                "type": "array",
+                "items": "string"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "user_anip",
+        "type": "int"
+      },
+      {
+        "name": "consent_grant",
+        "type": {
+          "type": "record",
+          "name": "ConsentGrant",
+          "fields": [
+            {
+              "name": "name",
+              "type": "boolean"
+            },
+            {
+              "name": "age",
+              "type": "boolean"
+            },
+            {
+              "name": "telephone_number",
+              "type": "boolean"
+            },
+            {
+              "name": "email_address",
+              "type": "boolean"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "ConsentFlags": {
+    "name": true,
+    "age": true,
+    "telephone_number": true,
+    "email_address": true
+  }
+}
+

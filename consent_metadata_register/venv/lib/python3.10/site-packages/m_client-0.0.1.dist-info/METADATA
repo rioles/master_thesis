@@ -1,0 +1,16 @@
+Metadata-Version: 2.1
+Name: m-client
+Version: 0.0.1
+Summary: m_client
+Home-page: UNKNOWN
+Author: Sergei Chaban
+Author-email: s_chaban@mail.ru
+License: UNKNOWN
+Platform: UNKNOWN
+Requires-Dist: PyQt5
+Requires-Dist: sqlalchemy
+Requires-Dist: pycryptodome
+
+UNKNOWN
+
+

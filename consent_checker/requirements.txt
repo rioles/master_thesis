@@ -1,0 +1,16 @@
+async-timeout==5.0.1
+certifi==2024.8.30
+charset-normalizer==3.4.0
+confluent-kafka==2.6.0
+content-check==0.0.1
+fastavro==1.9.7
+hiredis==2.4.0
+idna==3.10
+python-dateutil==2.9.0.post0
+python-dotenv==1.0.1
+redis==3.5.3
+redisbloom==0.4.1
+requests==2.32.3
+rmtest==0.7.0
+six==1.16.0
+urllib3==2.2.3

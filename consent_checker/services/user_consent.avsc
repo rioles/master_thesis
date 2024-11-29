@@ -1,0 +1,59 @@
+{
+  "type": "record",
+  "name": "consent_data_value",
+  "fields": [
+    {
+      "name": "consent",
+      "type": [
+        "null",
+        {
+          "type": "record",
+          "name": "consentRecord",
+          "fields": [
+            {"name": "name", "type": {"type": "array", "items": "string"}, "default": []},
+            {"name": "age", "type": {"type": "array", "items": "string"}, "default": []},
+            {"name": "telephone_number", "type": {"type": "array", "items": "string"}, "default": []},
+            {"name": "email_address", "type": {"type": "array", "items": "string"}, "default": []}
+          ]
+        }
+      ],
+      "default": null
+    },
+    {
+      "name": "client",
+      "type": [
+        "null",
+        {
+          "type": "record",
+          "name": "clientRecord",
+          "fields": [
+            {"name": "client_name", "type": "string", "default": ""},
+            {"name": "client_id", "type": "string", "default": ""}
+          ]
+        }
+      ],
+      "default": null
+    },
+    {
+      "name": "consent_grant",
+      "type": [
+        "null",
+        {
+          "type": "record",
+          "name": "consent_grantRecord",
+          "fields": [
+            {"name": "name", "type": "boolean", "default": false},
+            {"name": "age", "type": "boolean", "default": false},
+            {"name": "telephone_number", "type": "boolean", "default": false},
+            {"name": "email_address", "type": "boolean", "default": false}
+          ]
+        }
+      ],
+      "default": null
+    },
+    {"name": "user_anip", "type": "int", "default": 0},
+    {"name": "expiration_date", "type": "string", "default": ""},
+    {"name": "validity", "type": "boolean", "default": false}
+  ]
+}
+
