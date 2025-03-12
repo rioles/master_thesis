@@ -14,7 +14,6 @@ class PermissionIdentity(BaseModel, Base):
 
     id_data_subject = Column(String(255), nullable=False)
     erase = Column(Boolean, nullable=False)
-    is_delete = Column(Boolean, nullable=False)
     beginning_date = Column(DateTime, nullable=False)
     expiration_date = Column(DateTime, nullable=False)
     consent_date = Column(DateTime, nullable=False)

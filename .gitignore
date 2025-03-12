@@ -7,5 +7,6 @@ entepriseregistration/.env
 webhook_micro_service/venv/
 webhook_micro_service/.env/
 get_data_to_client/
+.git
 
 

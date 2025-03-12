@@ -10,6 +10,7 @@ from sqlalchemy import event
 TIMESTAMP_FORMAT = "%Y-%m-%dT%H:%M:%S"
 class DataController(BaseModel, Base):
     __tablename__ = 'data_controller'
+    data_controller_id = Column(String(255), nullable=False)
     data_controller_name = Column(String(255), nullable=False)
     data_controller_type = Column(String(255), nullable=False)
     permission_identities = relationship('PermissionIdentity', back_populates='data_controller')

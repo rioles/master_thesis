@@ -22,6 +22,7 @@ import fastavro
 import json
 from dotenv import load_dotenv
 load_dotenv()
+from models.reclamation import Reclamation
 
 # logging.basicConfig(filename='/tmp/userlogin.log', level=logging.DEBUG, 
 # format='%(asctime)s - %(levelname)s - %(message)s')
@@ -39,6 +40,21 @@ def post_enterprise():
     # response.headers['Enterprise'] = jsonify(enterprise.to_dict())
     # return make_response(jsonify(enterprise.to_dict()), 201)
     return response, 201
+    
+
+@app_views.route('/addcip', methods=['POST'], strict_slashes=False)
+@cross_origin()
+def post_cip():
+    """Create a new category"""
+    if not request.get_json():
+        return make_response(jsonify(
+            {'status': '401', 'message': 'The request data is empty'}), 400)
+    enter: EnterpriseService = EnterpriseService()    
+    reclam = enter.add_objects(Reclamation, **request.get_json())
+    #response = send_file(file_name, as_attachment=True)
+    # response.headers['Enterprise'] = jsonify(enterprise.to_dict())
+    # return make_response(jsonify(enterprise.to_dict()), 201)
+    return jsonify(reclam), 201    
     
     
 @app_views.route('/verify', methods=['GET'])
@@ -80,6 +96,7 @@ def verify_tokenss():
 def user_consent_data():
     auth_service: AuthService = AuthService()
     consent = auth_service.send_consent_request()
+    print(consent)
     return jsonify(consent), 200
     
 
@@ -87,10 +104,21 @@ def user_consent_data():
 @cross_origin()    
 def data_get_from_webhook():
     data = request.get_json()
+    header = request.headers
+    print(header)
     print(data)
     return jsonify({"data":"received"}), 200
-
-
+    
+    
+@app_views.route('/cmd', methods=['POST'])
+@cross_origin()    
+def update_data_get_from_webhook():
+    data = request.get_json()
+    header = request.headers
+    print(header)
+    print(data)
+    return jsonify({"data":"received"}), 200
+    
    
 @app_views.route('/user_identifier', methods=['POST'])
 @cross_origin()    

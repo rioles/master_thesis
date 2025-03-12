@@ -22,6 +22,8 @@ models/__init__.py
 models/base.py
 models/basic_base.py
 models/enterprise.py
+models/personne2.py
+models/reclamation.py
 models/engine/__init__.py
 models/engine/dbs_manager.py
 services/__init__.py

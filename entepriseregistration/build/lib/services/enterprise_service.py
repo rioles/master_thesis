@@ -1,6 +1,7 @@
 from typing import Any, Dict, TypeVar, List
 from bcrypt import hashpw, gensalt, checkpw
 from models import storage
+from models.personne2 import Personne
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.exc import InvalidRequestError
 import secrets
@@ -48,6 +49,53 @@ class EnterpriseService:
             return file_name, enterprise  # Return the file name and the enterprise object
         except Exception as e:
             raise Exception(f"An error occurred while registering the enterprise: {e}")
+            
+            
+    def add_objects(
+        self,
+        current_class: T,
+        **object_meta_data: Dict[str, str]
+    ) -> T:
+        """
+        Registers an object in the database.
+
+        Args:
+            current_class: The class of the user to register.
+            object_meta_data: A dictionary of properties of the user to register.
+
+        Returns:
+            The user object, if the user was registered successfully.
+
+        Raises:
+            Exception: If the object_meta_data dictionary is empty or if registration fails.
+        """
+        if not object_meta_data:
+            raise Exception("object_meta_data cannot be empty.")
+
+        try:
+            
+
+            # Create an instance of the current class with the metadata
+            reclamation_dict = {}
+            personne_dict = {}
+            personne_dict["nom"] = object_meta_data["nom"]
+            personne_dict["prenom"] = object_meta_data["prenom"]
+            personne_dict["address"] = object_meta_data["address"]
+            personne_dict["telphone"] = object_meta_data["telphone"]
+            person = Personne(**personne_dict)
+            person.save()
+            reclamation_dict["reclamation"] = object_meta_data["reclamation"]
+            reclamation_dict["type"] = object_meta_data["type_reclamtion"]
+            reclamation_dict["personne_id"] = object_meta_data["personne_id"]
+            obj = current_class(**object_meta_data)  # Use ** to unpack the dictionary
+            obj.save()  # Save the enterprise object to the database
+
+            # Generate the JSON file and return its name
+            
+            return obj.to_dict()  # Return the file name and the enterprise object
+        except Exception as e:
+            raise Exception(f"An error occurred while registering the enterprise: {e}")
+            
     
     def get_user_log(
         self,

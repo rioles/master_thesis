@@ -39,13 +39,15 @@ class ReturnObject:
     
   
   def data_to_get_from_provider(self):
-  	consent_grant = self.consent_attribut_array()[0]
-  	consent_need = {"user_anip": self.request_data["user_anip"]}
-  	i = 0
-  	for element in consent_grant:
-  		consent_need[element] = i
-  		i = i+1
-  	return consent_need
+    my_attributs = set()
+    consent_grant = self.consent_attribut_array()[0]
+    id = self.request_data["client"]["client_id"]
+    consent_need = {"user_anip": self.request_data["user_anip"], "controller_id": id}
+    for element in consent_grant:
+        my_attributs.add(element)
+        consent_need["consent_attributs"] = my_attributs
+    return consent_need
+
   	
   def create_purpose_object(self):
     purpose_data = []
@@ -60,14 +62,16 @@ class ReturnObject:
     return consent_object, purpose_data
 
   def create_data_controller(self):
-    data_controler_dict = {"data_controller_name": self.request_data["client"]["client_name"], "id": self.request_data["client"]["client_id"], "data_controller_type": "private"}
+    data_controler_dict = {"data_controller_name": self.request_data["client"]["client_name"], "data_controller_id": self.request_data["client"]["client_id"], "data_controller_type": "private"}
     data_controler_obj = DataController(**data_controler_dict)
+    self.request_data["id_data_controller"] = data_controler_obj.id
     return data_controler_obj
 
   def create_data_provider(self):
     if "provider" not in self.request_data:
       data_provider_dict = {"provider_name": "ANIP", "type_of_provider": "public"}
       data_provider = DataProvider(**data_provider_dict)
+      
       return data_provider
     else:
       data_provider_dict = {"provider_name": self.request_data["provider"]["provider_name"], "type_of_provider": self.request_data["provider"]["type_of_provider"]}
@@ -76,11 +80,11 @@ class ReturnObject:
 
   def create_data_processor(self):
     if "processor" not in self.request_data:
-      data_processor_dict = {"data_process_name": self.request_data["client"]["client_name"], "data_process_type": "private", "data_controller_id": self.request_data["client"]["client_id"]}
+      data_processor_dict = {"data_process_name": self.request_data["client"]["client_name"], "data_process_type": "private", "data_controller_id": self.request_data["id_data_controller"]}
       data_processor = DataProcessor(**data_processor_dict)
       return data_processor
     else:
-      data_processor_dict = {"data_process_name": self.request_data["processor"]["processor_name"], "data_process_type": self.request_data["processor"]["type_of_processor"], "data_controller_id": self.request_data["client"]["client_id"]}
+      data_processor_dict = {"data_process_name": self.request_data["processor"]["processor_name"], "data_process_type": self.request_data["processor"]["type_of_processor"], "data_controller_id": self.request_data["id_data_controller"]}
       data_processor = DataProcessor(**data_processor_dict)
       return data_processor     		
     	
@@ -110,8 +114,8 @@ my_dict = {
     },
     "consent_grant": {
         "age": True,
-        "email_address": False,
-        "name": True,
+        "email_address": True,
+        "name": False,
         "telephone_number": True
     },
     "consent_grant_date": "Wed, 27 Nov 2024 11:01:44 GMT",
@@ -130,10 +134,11 @@ def consent_give_by_user(consent_give):
 obj = ReturnObject(my_dict)
 print(obj.consent_attribut_array())
 print(obj.create_consent_attribut_object())
-print(obj.create_purpose_object())
+print("this is consent purpose", obj.create_purpose_object())
 print(obj.create_data_controller())
 print(obj.create_data_provider())
 print(obj.create_data_processor())
+print(obj.data_to_get_from_provider())
 print(obj.data_to_get_from_provider())	
     		
     		

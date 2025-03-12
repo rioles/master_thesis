@@ -13,9 +13,9 @@ from models.enterprise import Enterprise
 
 class AuthService:
     # Class-level constant for the login URL
-    LOGIN_URL = "https://e37e-41-85-163-62.ngrok-free.app/api/v1/login"  
-    REDIRECT_URL = "https://e37e-41-85-163-62.ngrok-free.app/api/v1/consent_data"
-    CHECK_ENTERPRISE_URL = "https://e37e-41-85-163-62.ngrok-free.app/api/v1/show"
+    LOGIN_URL = "https://cfde-41-216-54-246.ngrok-free.app/api/v1/login"  
+    REDIRECT_URL = "https://cfde-41-216-54-246.ngrok-free.app/api/v1/consent_data"
+    CHECK_ENTERPRISE_URL = "https://cfde-41-216-54-246.ngrok-free.app/api/v1/show"
 
     def __init__(self):
         # Retrieve client ID and client secret from environment variables

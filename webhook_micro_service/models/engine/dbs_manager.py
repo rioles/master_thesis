@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 load_dotenv()
 from dateutil import parser
 from datetime import datetime
+import json
 
 
 class RedisDBManager:
@@ -59,11 +60,17 @@ class RedisDBManager:
         
 if __name__ == "__main__":
     client_id = os.getenv("CLIENT_ID")
+    client_id_test = os.getenv("CLIENT_IDs") 
+    client_id_tests = os.getenv("CLIENT_IDss")
     client_url = os.getenv("CLIENT_URL")
+    cmd_url = os.getenv("CLIENT_URLs")
     redis = RedisDBManager()
     pipeline = redis.pipeline()
-    redis.set(client_id, client_url)
-    data = redis.get(client_id)
+    client_urls = {"client_ressour_url":client_url}
+    client_urls["cmd_url"] = cmd_url
+    redis.set(client_id, json.dumps(client_urls))
+    redis.set(client_id_tests, json.dumps(client_urls))
+    data = json.loads(redis.get(client_id_test))["client_ressour_url"]
     print(data)
     print(pipeline)
 	

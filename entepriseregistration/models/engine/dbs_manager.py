@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+
 import os
 from sqlalchemy import asc
 from sqlalchemy import Column, String, DateTime,func, create_engine, Numeric, ForeignKey, Text, or_, and_
@@ -8,6 +9,8 @@ from sqlalchemy.orm.exc import NoResultFound
 from models.basic_base import Base
 from models.base import BaseModel
 from models.enterprise import Enterprise
+from models.reclamation import Reclamation
+from models.personne2 import Personne
 from dotenv import load_dotenv
 from datetime import date, datetime, timedelta
 from sqlalchemy.orm import joinedload

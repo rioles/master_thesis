@@ -6,7 +6,7 @@ from flask_jwt_extended.exceptions import NoAuthorizationError, JWTDecodeError
 from jwt.exceptions import ExpiredSignatureError
 from models import storage
 from api.v1.endpoints import app_views
-from models.enterprise import Enterprise
+
 import os
 import secrets
 
@@ -37,12 +37,7 @@ def add_claims_to_access_token(identity):
     user_info = {'role': 'admin'}  # Additional claim: 'role'
     return user_info
 
-@jwt.user_lookup_loader
-def user_lookup_callback(_jwt_header, jwt_data):
-    identity = jwt_data["sub"]  # Assuming the 'sub' claim in the JWT represents the user identity
-    # Lookup the user based on the identity
-    enterprise = storage.find_by(Enterprise, **{"client_id": identity})
-    return enterprise
+
 
 @jwt.expired_token_loader
 def expired_token_callback(jwt_header, jwt_payload):

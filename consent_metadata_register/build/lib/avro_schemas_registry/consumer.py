@@ -5,6 +5,8 @@ from confluent_kafka.schema_registry.avro import AvroDeserializer
 from confluent_kafka.serialization import SerializationContext, MessageField
 from avro_schemas_registry.schema_registry_client import SchemaClient
 from avro_schemas_registry.convert_data_to_avro import  generate_schema_from_dict
+from services.consent_registration_service import ConsentRegistration
+from services.return_object import ReturnObject
 
 import fastavro
 import json
@@ -88,42 +90,39 @@ class ConsumerGroupClass:
                 
                 # Process the message (custom processing logic)
                 self.process_message(message_deserialized)
+                obj = ReturnObject(message_deserialized)
+                register = ConsentRegistration(message_deserialized, obj)
+                register.process_matadata_registration()
 
         except KeyboardInterrupt:
             pass
         finally:
             self.consumer.close()
 
+def load_avro_schema(schema_file):
+    with open(schema_file, 'r') as f:
+        schema = json.load(f)  # Load JSON from file
+    return schema	
 	
-	
-# Load Avro schema (mock function - replace with actual schema loading)
-def load_avro_schema(file_path):
-    with open(file_path, 'r') as f:
-        return json.load(f)
-
-if __name__ == "__main__":
-    # Environment variables
+def return_consumer_object():
     schema_file = os.getenv('schema_file')
+    print(schema_file)
     schema_url = os.getenv('schema_url')
+    topic_name = os.getenv('topic_name')
     subject_name = os.getenv('subject_name')
-    topic = os.getenv('topic_name')
-    
+    print("subject_name", subject_name)
+    subject_name2 = os.getenv('subject_name_1')
     bootstrap_server = os.getenv('bootstrap_server')
-    
-    if not all([schema_file, schema_url, topic_name, topic, bootstrap_server]):
-        raise ValueError("Missing required environment variables.")
-    
-    # Load schema and set up the schema client (mock client - replace with actual SchemaClient)
+    topic_0_name = os.getenv('topic_name_1')
     schema_dict = load_avro_schema(schema_file)
+    #print(schema_dict)
     schema_json_str = json.dumps(schema_dict)
-    
-    # Assume SchemaClient is implemented elsewhere
-    client = SchemaClient(schema_url, subject_name, schema_json_str, "AVRO")
+    schema_type = "AVRO"
+    client = SchemaClient(schema_url, subject_name, schema_dict, schema_type)
     client.set_compatibility("FORWARD")
     schema = client.get_schema_str()
-    print(schema)
-    
-    # Instantiate the consumer group and start consuming messages
-    consumer = ConsumerGroupClass(bootstrap_server, topic, "78945", client.schema_client, schema)
+    consumer = ConsumerGroupClass(bootstrap_server, topic_name, 47518, client.schema_client, schema)
     consumer.consume_messages()
-	
+
+if __name__ == "__main__":
+    return_consumer_object()

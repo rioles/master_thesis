@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import os
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy import asc, Column, String, DateTime, func, create_engine, Numeric, ForeignKey, Text, or_, and_
 from sqlalchemy.orm import sessionmaker, scoped_session, relationship, joinedload
 from typing import Any, Dict, List, Optional, TypeVar, Union
@@ -43,7 +44,43 @@ class DBSManager():
         """add object to current session
         """
         self.__session.add(obj)
+    def bulk_save(self, objects):
+        """Add multiple objects to the current session and commit"""
+        if not objects:
+            return  # Avoid processing an empty list
 
+        try:
+            self.__session.bulk_save_objects(objects)
+            self.__session.flush()
+        except SQLAlchemyError as e:
+            self.__session.rollback()  # Ensures rollback on failure
+            print(f"Error during bulk insert: {e}")  # Log the error
+
+
+    def bulk_transaction(self, operations):
+        """
+        Executes multiple bulk operations in a single transaction.
+        
+        :param operations: A list of tuples where each tuple contains:
+                           (operation_function, list_of_objects)
+        """
+        if not operations:
+            return
+
+        try:
+            session = self.__session()
+            if session.in_transaction():
+                session.commit()
+            with session.begin():  # Begin transaction
+                for operation, objects in operations:
+                    if objects:
+                        operation(objects)  # Call the function with the objects
+            session.commit()  # Commit if all operations succeed
+        except SQLAlchemyError as e:
+            session.rollback()  # Rollback if any error occurs
+            print(f"Transaction failed: {e}")
+	
+    
     def save(self):
         """commit current done work
         """
@@ -93,7 +130,7 @@ class DBSManager():
         except NoResultFound:
             return []
 
-    
+     
     def find_all_with_join(self, prim_class: T, join_class: T , **kwargs) -> T:
         """
         Find a object by the given criteria
@@ -130,6 +167,17 @@ class DBSManager():
             return object_t
         except NoResultFound:
             return []
+    
+    def find_by_order_desc(self, target_class: T, **kwargs) -> Optional[T]:
+        try:
+            query = self.__session.query(target_class).filter_by(**kwargs)
+            query = query.order_by(target_class.created_at.desc())
+            object_t = query.first()
+            if not object_t:
+                raise NoResultFound("No object found")
+            return object_t    
+        except NoResultFound:
+            return None
         
     def find_all_with__twow_class_join(self, prim_class: T, join_class: T, relationship_attr: str) -> T:
         """
@@ -312,208 +360,5 @@ class DBSManager():
     
     
     
-    def get_sum_with_filter_and_interval(
-        self, 
-        target_class: T,
-        start_date: datetime,
-        end_date: datetime,
-        sum_param1: str,
-        sum_param2: str = None,
-        **kwargs: Dict[str, Any],
-        ) -> Any:
-        """
-        Calculate the sum based on the provided sum parameters and filter conditions.
     
-        Args:
-            target_class (Type[YourClass]): The class representing the database table.
-            sum_param1 (str, required): The first sum parameter attribute name.
-            sum_param2 (str, optional): The second sum parameter attribute name. Defaults to None.
-            start_date (datetime, optional): The start of the day for date_column filtering.
-            end_date (datetime, optional): The current date and time for date_column filtering.
-            **kwargs: Additional filter conditions as keyword arguments.
-
-        Returns:
-            Any: The calculated sum based on the sum parameters and filter conditions.
-        """
-        if not hasattr(target_class, sum_param1) or (sum_param2 and not hasattr(target_class, sum_param2)):
-            raise AttributeError(f"{target_class.__name__} does not have attribute '{sum_param1}' or '{sum_param2}'.")
-
-        query_params = [getattr(target_class, sum_param1)]
-        if sum_param2:
-            query_params.append(getattr(target_class, sum_param2))
-
-        query = self.__session.query(func.sum(*query_params))
-
-        # Add date_column filtering conditions
-        if start_date and end_date:
-            query = query.filter(
-                target_class.created_at >= start_date,
-                target_class.created_at <= end_date
-            )
-
-        # Add additional filter conditions
-        query = query.filter_by(**kwargs)
-
-        total_sum = query.scalar()
-        return total_sum
-    
-    
-    def get_object_by_date_interval_and_filter(
-        self,
-        target_class: T,
-        start_date: datetime,
-        end_date: datetime,
-        order_by: str = 'created_at',
-        **kwargs: Dict[str, Any]
-    ) -> List:
-        """
-        Get settlements objects by interval and filter.
-
-        Parameters:
-        - target_class (Type): The class of the target object.
-        - start_date (datetime): The start date of the interval.
-        - end_date (datetime): The end date of the interval.
-        - order_by (str): The field to order the results by (default: 'created_at').
-        - kwargs (Dict[str, Any]): Additional filters.
-
-        Returns:
-        - List: A list of SQLAlchemy objects.
-        """
-        order_clause = getattr(target_class, order_by)
-        
-        conditions = [
-            target_class.created_at >= start_date  if start_date is not None else True,
-            target_class.created_at <= end_date
-        ]
-        
-        if target_class == Invoice:
-            conditions.append(target_class.invoice_amount > 0)
-        
-        #conditions = [
-            #or_(
-                #and_(target_class.created_at >= start_date, target_class.created_at < end_date),
-                #and_(target_class.created_at > start_date, target_class.created_at <= end_date),
-                #and_(target_class.created_at <= start_date, target_class.created_at >= end_date),
-                #and_(target_class.created_at <= start_date, target_class.created_at >= end_date, target_class.created_at >= start_date, target_class.created_at <= end_date)
-                #)
-        #]
-        
-        
-        for key, value in kwargs.items():
-            conditions.append(getattr(target_class, key) == value)
-
-        query_result = (
-            self.__session.query(target_class)
-            .filter(and_(*conditions))
-            .order_by(order_clause)
-            .all()
-        )
-        return query_result
-    
-    def get_object_by_date_interval_and_filters(
-        self,
-        target_class: T,
-        start_date: Union[str, datetime],
-        end_date: Union[str, datetime],
-        **additional_filters
-    ) -> List[T]:
-        if isinstance(start_date, str):
-            start_date = convert_to_timestamp(start_date)
-        if isinstance(end_date, str):
-            end_date = convert_to_timestamp(end_date)
-
-        try:
-            filter_conditions = [
-                or_(
-                    and_(target_class.start_date >= start_date, target_class.start_date < end_date),
-                    and_(target_class.end_date > start_date, target_class.end_date <= end_date),
-                    and_(target_class.start_date <= start_date, target_class.end_date >= end_date),
-                    and_(target_class.start_date <= start_date, target_class.end_date >= end_date, target_class.start_date >= start_date, target_class.end_date <= end_date)
-                )
-            ]
-
-            for key, value in additional_filters.items():
-                filter_conditions.append(getattr(target_class, key) == value)
-
-            results = self.__session.query(target_class).filter(
-                *filter_conditions
-            ).order_by(asc(target_class.created_at)).all()
-
-            return results
-        except NoResultFound:
-            return []
-        
-        
-    
-    def get_objects_with_positive_attribute(
-        self,
-        target_class: T,
-        attribute: Any,
-        **filter
-    ) -> List:
-        """
-        Get objects with a specified attribute greater than 0.
-
-        Parameters:
-        - target_class (Type): The class of the target object.
-        - attribute (Any): The attribute to filter on.
-
-        Returns:
-        - List: A list of SQLAlchemy objects.
-        """
-        query_result = (
-            self.__session.query(target_class)
-            .filter(getattr(target_class, attribute) > 0)
-            .filter_by(**filter)
-            .all()
-        )
-        return query_result
-
-def convert_to_timestamp(date_str: str) -> Union[None, datetime]:
-    try:
-        return datetime.strptime(date_str, TIMESTAMP_FORMAT)
-    except ValueError:
-        return None
-    
-    """
-    
-    def get_object_by_date_interval_and_filter(
-        self,
-        target_class: T,
-        start_date: datetime,
-        end_date: datetime,
-        order_by: str = 'created_at',
-        **kwargs: Dict[str, Any]
-    ) -> List:
-        
-        #Get settlements objects by interval and filter.
-
-        #Parameters:
-        #- target_class (Type): The class of the target object.
-        #- start_date (datetime): The start date of the interval.
-        #- end_date (datetime): The end date of the interval.
-        #- order_by (str): The field to order the results by (default: 'created_at').
-        #- kwargs (Dict[str, Any]): Additional filters.
-
-        #Returns:
-        #- List: A list of SQLAlchemy objects.
-        
-        order_clause = getattr(target_class, order_by)
-        
-        conditions = [
-            target_class.created_at >= start_date  if start_date is not None else True,
-            target_class.created_at <= end_date
-        ]
-        
-        for key, value in kwargs.items():
-            conditions.append(getattr(target_class, key) == value)
-
-        query_result = (
-            self.__session.query(target_class)
-            .filter(and_(*conditions))
-            .order_by(order_clause)
-            .all()
-        )
-        return query_result  
-
-    """
+ 

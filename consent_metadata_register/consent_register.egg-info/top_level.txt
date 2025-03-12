@@ -1,8 +1,9 @@
 api
 api/v1
 api/v1/endpoints
-api/v1/endpoints/enterprise
+api/v1/endpoints/consents
 avro_schemas_registry
+message_queu
 models
 models/engine
 services
